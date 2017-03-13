@@ -1,5 +1,6 @@
 "mode strict";
 var express = require('express'),
+  fs = require('fs'),
   router = express.Router(),
   MongoClient = require('mongodb').MongoClient,
   mongoUrl = process.env.MONGOLAB_URI,
@@ -38,13 +39,13 @@ router.get('/', function (req, res) {
 
     '<li>'+
     '<p>Google search:</p>'+
-    '<a href="fcc04/google-image-search-api/dogs and cats">https://ikarus512-fcc.herokuapp.com/fcc04/google-image-search-api/dogs and cats</a><br>'+
+    '<a href="fcc04/google-image-search-api/dogs and cats photo">https://ikarus512-fcc.herokuapp.com/fcc04/google-image-search-api/dogs and cats photo</a><br>'+
     '<p>will output first 10 results.'+
     '</li>'+
 
     '<li>'+
     '<p>Google search with paginating:</p>'+
-    '<a href="fcc04/google-image-search-api/dogs and cats?offset=2">https://ikarus512-fcc.herokuapp.com/fcc04/google-image-search-api/dogs and cats?offset=2</a><br>'+
+    '<a href="fcc04/google-image-search-api/dogs and cats photo?offset=2">https://ikarus512-fcc.herokuapp.com/fcc04/google-image-search-api/dogs and cats photo?offset=2</a><br>'+
     '<p>will output 10 results starting from result 2.'+
     '</li>'+
 
@@ -203,7 +204,7 @@ router.get(/^\/flickr-image-search-api\/.+/, function (req, res) {
 
           } catch(err) {
 
-            res.json({error: err, errId: 'Reason: flickr API changed.'});
+            res.json({error: err, errId: 'Reason: Flickr API changed.'});
 
           }
 
@@ -218,7 +219,7 @@ router.get(/^\/flickr-image-search-api\/.+/, function (req, res) {
 //
 //  /google-image-search-api/searchterms?offset=n
 //
-router.get(/^\/google-image-search-api\/.+/, function (req, res) {
+router.get(/^\/google-image-search-api\/.+/, function (req, res, next) {
   var searchstr = req.url.replace(/^\/google-image-search-api\//,'');
 
   var terms = decodeURI(searchstr.replace(/\?.*$/,''));
@@ -227,6 +228,14 @@ router.get(/^\/google-image-search-api\/.+/, function (req, res) {
   offset = (offset) ? (+offset[0].replace(/^\?offset=/,'')) : (0);
 
   var date = new Date().getTime();
+
+  // console.log(req.url)
+  // console.log(terms)
+  // console.log(offset)
+  // console.log('')
+
+  // Here is workaround of second call of the same route
+  if(terms === 'undefined') {next(); return;}
 
   MongoClient.connect(mongoUrl, function(err, db) {
     if(err) {
@@ -252,26 +261,17 @@ router.get(/^\/google-image-search-api\/.+/, function (req, res) {
   function doSearch(req, res, terms, offset) {
     // Do search.
 
-    // var page = 1 + Math.floor(offset / 20);
-    // var offset1 = offset - (page-1)*20;
-
-    // Flickr API
-    // Example call: https://www.flickr.com/services/api/explore/flickr.photos.search
-    // Result format: https://www.flickr.com/services/api/misc.urls.html
-    request.get(
+    var reqUrl = '' +
       'https://www.googleapis.com/customsearch/v1?' +
-      'key=AIzaSyD58osN4_426fVbzc3J0nDU1eA4BlIr3tg' +
-      '&cx=017576662512468239146:omuauf_lfve' +
-      '&q=' + terms.split(' ').join('+') +
-      // '?method=flickr.photos.search' +
-      // '&api_key=227fa1b8d084d4f9c2889b70911aa308' +
-      // '&tags=' + terms.split(' ').join('+') +
-      // '&per_page=20' +
-      // '&page='+page +
-      // '&format=json' +
-      // '&nojsoncallback=1' +
-      // '&api_sig=a76473eada2f299af949f9cd8de83f53' +
-      '',
+      'key=AIzaSyC82mq3YV2f6GqByzhTx-2Se9tFhwCbXNU' +
+      '&cx=016019721665571394641:7n3pyjfhvgc' +
+      '&q=' + terms +
+      '&start=' + (offset+1) +
+      '';
+
+    request.get(
+
+      reqUrl,
 
       function(err, response, data) {
 
@@ -289,26 +289,32 @@ router.get(/^\/google-image-search-api\/.+/, function (req, res) {
 
           try{
 
-res.send(JSON.stringify(data));
-            // res.send(
+            res.send(
 
-            //   'Images ' + offset + '-' + (offset + 9) + ' of total ' + data.photos.total + '<br>' +
+              'Images ' + offset + '-' + (offset + 9) + ' of total ' + data.searchInformation.totalResults + '<br>' +
 
-            //   data.photos.photo
-            //   .filter( function(item,i) { return (i>=offset1)&&(i<offset1+10); })
-            //   .map( function(el) {
-            //     // { "id": "32827634826", "owner": "7702423@N04", "secret": "6b3459a11a", "server": "2140", "farm": 3, "title": "245\/365\/3167 (February 11, 2017) - Peaceful Kingdom (Flappy and Cosmo)", "ispublic": 1, "isfriend": 0, "isfamily": 0 },
-            //     var src='https://farm'+el.farm+'.staticflickr.com/'+el.server+'/'+el.id+'_'+el.secret+'.jpg';
-            //     var title = el.title;
-            //     return '<h4>'+title+'</h4><a href="'+src+'"><img src="'+src+'"" alt="'+title+'" height=100></a>' +
-            //       '<br>' + JSON.stringify(el);
-            //   }).join('')
+              data.items
+              .map( function(el) {
+                var src;
+                if(el.pagemap && el.pagemap.cse_image && el.pagemap.cse_image[0] && el.pagemap.cse_image[0].src)
+                  src = el.pagemap.cse_image[0].src;
 
-            // );
+                var title = el.title;
+                return '<h4>'+title+'</h4><a href="'+src+'"><img src="'+src+'"" alt="'+title+'" height=100></a>' + '<br>' +
+                  // '<div style="font-size:7px">' + JSON.stringify(el) + '</div>' +
+                  '';
+              }).join('')
+
+            );
 
           } catch(err) {
 
-            res.json({error: err, errId: 'Reason: flickr API changed.'});
+            // data=JSON.stringify(data,null,4);
+            // fs.writeFile("1.1",data,function(err){
+            //   if (err) console.log('load err: '+err+' returning empty data');
+            // });
+
+            res.json({error: err, errId: 'Reason: Google API changed.'});
 
           }
 
