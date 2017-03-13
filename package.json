@@ -1,0 +1,27 @@
+{
+  "name": "fcc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ikarus512/fcc.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ikarus512/fcc/issues"
+  },
+  "homepage": "https://github.com/ikarus512/fcc#readme",
+  "dependencies": {
+    "body-parser": "^1.17.1",
+    "express": "^4.15.2",
+    "mongodb": "^2.2.24",
+    "multer": "^1.3.0",
+    "request": "^2.81.0"
+  }
+}

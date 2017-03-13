@@ -1,0 +1,8 @@
+git clone https://github.com/ikarus512/fcc.git
+npm init
+npm i -S express body-parser multer mongodb request
+git add -A & git commit -m "First version" & git push origin master
+ heroku login
+heroku create ikarus512-fcc
+heroku config:set MONGOLAB_URI=mongodb://user1:password1@ds123930.mlab.com:23930/ikarus512fcc003
+git push heroku master
