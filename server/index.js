@@ -39,6 +39,7 @@ app.use('/fcc02', fcc02_header_parser);
 app.use('/fcc03', fcc03_url_shortener);
 app.use('/fcc04', fcc04_image_search);
 app.use('/fcc05', fcc05_file_upload);
+app.use('/api', require('./roots/server.js'));
 
 // *
 app.all('*', function (req, res) {
