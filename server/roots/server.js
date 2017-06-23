@@ -6,9 +6,10 @@ var express = require('express'),
   myEnableCORS = require('./my-enable-cors.js');
 
 router
-.all(/^\/w\/.+/, myEnableCORS)
-.get(/^\/w\/.+/, function (req, res) {
-  var searchstr = req.url.replace(/^\/w\//,''),
+.all(/^\/w+\/.+/, myEnableCORS)
+.get(/^\/w+\/.+/, function (req, res) {
+  var searchstr = req.url.replace(/^\/w+\//,''),
+    detailes = req.url.match(/^\/ww/,''),
     arr_temperature,
     arr_precip_val,
     arr_precip_ver,
@@ -58,16 +59,23 @@ router
 
 
 
-      res.json({
+      var result = {
         searchstr,
         arr_temperature,
         arr_precip_val,
         arr_precip_ver,
         arr_wind_speed,
-        arr_pressure,
-        arr_humidity,
-        arr_phenomenon_name,
-      });
+        // arr_pressure,
+        // arr_humidity,
+        // arr_phenomenon_name,
+      };
+      if (detailes) {
+        result.arr_pressure = arr_pressure;
+        result.arr_humidity = arr_humidity;
+        result.arr_phenomenon_name = arr_phenomenon_name;
+      }
+
+      res.json(result);
 
     } catch(err) {
       res.json({err});
