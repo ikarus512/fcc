@@ -2,11 +2,20 @@
 var express = require('express'),
   fs = require('fs'),
   router = express.Router(),
-  request = require('request');
+  request = require('request'),
+  myEnableCORS = require('./my-enable-cors.js');
 
-router.get(/^\/w\/.+/, function (req, res) {
+router
+.all(/^\/w\/.+/, myEnableCORS)
+.get(/^\/w\/.+/, function (req, res) {
   var searchstr = req.url.replace(/^\/w\//,''),
-    arr_temperature, arr_precip_val, arr_precip_ver;
+    arr_temperature,
+    arr_precip_val,
+    arr_precip_ver,
+    arr_wind_speed,
+    arr_pressure,
+    arr_humidity,
+    arr_phenomenon_name;
 
   if (process.env.APP_URL !== 'https://ikarus512-fcc.herokuapp.com') {
     var data = require('./1.js');
@@ -39,11 +48,26 @@ router.get(/^\/w\/.+/, function (req, res) {
   function processData(res, data) {
     try {
       // data = require('./1.js'),
-      arr_temperature = extractVal(data, 'arr_temperature');
+      arr_temperature= extractVal(data, 'arr_temperature');
       arr_precip_val = extractVal(data, 'arr_precip_val');
       arr_precip_ver = extractVal(data, 'arr_precip_ver');
+      arr_wind_speed = extractVal(data, 'arr_wind_speed');
+      arr_pressure   = extractVal(data, 'arr_pressure');
+      arr_humidity   = extractVal(data, 'arr_humidity');
+      arr_phenomenon_name   = extractVal(data, 'arr_phenomenon_name');
 
-      res.json({searchstr,arr_temperature,arr_precip_val,arr_precip_ver});
+
+
+      res.json({
+        searchstr,
+        arr_temperature,
+        arr_precip_val,
+        arr_precip_ver,
+        arr_wind_speed,
+        arr_pressure,
+        arr_humidity,
+        arr_phenomenon_name,
+      });
 
     } catch(err) {
       res.json({err});
