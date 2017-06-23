@@ -8,7 +8,7 @@ router.get(/^\/w\/.+/, function (req, res) {
   var searchstr = req.url.replace(/^\/w\//,''),
     arr_temperature, arr_precip_val, arr_precip_ver;
 
-  if (1===1) {
+  if (process.env.APP_URL !== 'https://ikarus512-fcc.herokuapp.com') {
     var data = require('./1.js');
     processData(res, data);
   } else {
