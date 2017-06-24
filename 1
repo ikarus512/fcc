@@ -5,6 +5,7 @@ git add -A & git commit -m "First version" & git push origin master
  heroku login
 heroku create ikarus512-fcc
 heroku config:set MONGOLAB_URI=mongodb://user1:password1@ds123930.mlab.com:23930/ikarus512fcc003
+heroku config:set APP_URL=https://ikarus512-fcc.herokuapp.com
 git push heroku master
 
 https://ikarus512-fcc.herokuapp.com/fcc01
